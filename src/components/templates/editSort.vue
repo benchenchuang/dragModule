@@ -1,11 +1,4 @@
 <style lang="less" scoped>
-    .header{
-        height: 60px;
-        line-height: 60px;
-        font-size: 18px;
-        color: #333;
-        border-bottom: 1px solid #e4e4e4;
-    }
     .sort_box{
         padding: 20px;
         color: #333;
@@ -58,7 +51,7 @@
             <Row class="sort_item">
                 <Col span="4" class="title">样式选择：</Col>
                 <Col span="20">
-                    <div class="item" :class="[currentIndex==sort.type?'on':'']" v-for="(sort,index) in sortArray" :key="index" @click="selectSort(sort.type)">
+                    <div :class="[currentIndex==sort.type?'on item':'item']" v-for="(sort,index) in sortArray" :key="index" @click="selectSort(sort.type)">
                         <img :src="sort.sortUrl"/>
                         <p>{{sort.title}}</p>
                     </div>
@@ -80,14 +73,7 @@
 <script>
 export default {
     name:'sortTemplate',
-    props: {
-        moduleData: {
-            type: Number,
-            default:()=>{
-                return 1
-            }
-        }
-    },
+    props: ['setData'],
     data () {
         return {
             sortArray:[
@@ -107,13 +93,21 @@ export default {
                     title:'仅1级分类'
                 }
             ],
-            currentIndex:this.moduleData
+            currentIndex:this.setData.moduleType
         }
+    },
+    watch: {
+        setData: {
+            handler(newVal, oldVal) {
+                this.currentIndex = newVal.moduleType;
+            },
+            deep: true
+    　　} 
     },
     methods: {
         selectSort(index){
             this.currentIndex = index;
-            this.$emit('getComponentStatus',{name:'sortModel',type:index})
+            this.$emit('getComponentStatus',{name:'setSort',type:index})
         }
     }
 }

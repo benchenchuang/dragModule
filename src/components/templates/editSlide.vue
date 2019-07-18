@@ -1,11 +1,4 @@
 <style lang="less" scoped>
-    .header{
-        height: 60px;
-        line-height: 60px;
-        font-size: 18px;
-        color: #333;
-        border-bottom: 1px solid #e4e4e4;
-    }
     .template_content{
         padding:20px;
         .title{
@@ -128,8 +121,8 @@
             </div>
         </div>
 
-        <Modal title="View Image" v-model="visible">
-            <img :src="'https://o5wwk8baw.qnssl.com/' + imgName + '/large'" v-if="visible" style="width: 100%">
+        <Modal title="预览图片" v-model="visible" >
+            <img :src="previewUrl" v-if="visible" style="width: 100%">
         </Modal>
     </div>
 </template>
@@ -173,7 +166,7 @@ export default {
                 }
             ],
             model: '',
-            imgName: '',
+            previewUrl: '',
             visible: false,
         }
     },
