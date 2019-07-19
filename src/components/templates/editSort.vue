@@ -79,17 +79,17 @@ export default {
             sortArray:[
                 {
                     type:1,
-                    sortUrl:require('../../assets/sort_01.png'),
+                    sortUrl:require('@/assets/images/sort_01.png'),
                     title:'1级、2级分类圆图'
                 },
                 {
                     type:2,
-                    sortUrl:require('../../assets/sort_02.png'),
+                    sortUrl:require('@/assets/images/sort_02.png'),
                     title:'1级、2级分类方图'
                 },
                 {
                     type:3,
-                    sortUrl:require('../../assets/sort_03.png'),
+                    sortUrl:require('@/assets/images/sort_03.png'),
                     title:'仅1级分类'
                 }
             ],

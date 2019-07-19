@@ -10,74 +10,41 @@
                     <span class="left_number">{{mainTitle.length}} / 6</span>
                 </Col>
             </Row>
-            <Row class="sort_item">
-                <Col span="5" class="title">描述内容：</Col>
-                <Col span="19" class="set_item">
-                    <Input type="text" v-model="mainDesc" :maxlength="10" size="large" placeholder="选填" />
-                    <span class="left_number">{{mainDesc.length}} / 10</span>
-                </Col>
-            </Row>
-            <Row class="sort_item">
-                <Col span="5" class="title">样式选择：</Col>
-                <Col span="19">
-                    <div :class="[currentIndex==shopType.type?'on item':'item']" v-for="(shopType,index) in shopTypes" :key="index" @click="selectType(shopType.type)">
-                        <img :src="shopType.typeUrl"/>
-                        <p>{{shopType.title}}</p>
-                    </div>
-                </Col>
-            </Row>
         </div>
         <div class="shops_wrap">
-            <p class="title">展示商品：</p>
+            <p class="title">企业商品：</p>
             <div class="shops_other">
                 <Button size="large" @click="addShops" icon="md-add" type="primary">添加商品</Button>
-                <span class="warning">必须添加 {{currentIndex==1?3:5}} 个商品</span>
+                <span class="warning">最多上传 20 个商品</span>
                 <span class="sub_tip">(上下拖动可调整商品顺序)</span>
             </div>
-            <showShopList :shopData="shopData" @changeShop="addShops"/>
+            <recommendList :shopData="shopData" @changeShop="addShops"/>
         </div>
         
         <Modal v-model="modal" width="1100" footer-hide @on-cancel="cancelShops">
             <p slot="header" class="modal_header">
                 <span>选择已上架商品</span>
             </p>
-            <selectShops v-if="modal" :changeIndex="changeIndex" :sortType.sync="currentIndex" :firstData="firstData" :secondData="secondData" @getSection="getSelection"/>
+            <selectShops v-if="modal" :changeIndex="changeIndex" :recommendData="shopData" @getSection="getSelection"/>
         </Modal>
     </div>
 </template>
 <script>
-import showShopList from './components/showShopList'
+import recommendList from './components/recommendList'
 import selectShops from './components/selectShops'
 export default {
     name:"shopsTemplate",
     props: ['setData'],
     components: {
-        showShopList,
+        recommendList,
         selectShops
     },
     data () {
         return {
-            shopTypes:[
-                {
-                    type:1,
-                    typeUrl:require('@/assets/images/shop_01.png'),
-                    title:'三图'
-                },
-                {
-                    type:2,
-                    typeUrl:require('@/assets/images/shop_02.png'),
-                    title:'五图'
-                }
-            ],
-            shopData:[],
-            firstData:[],
-            secondData:[],
+            shopData:this.setData.data,
             mainTitle:this.setData.title,
-            mainDesc:this.setData.desc,
-            currentIndex:this.setData.shopType,
             modal:false,
-            changeIndex:-1,
-            selection:[]
+            changeIndex:-1
         }
     },
     watch: {
@@ -90,14 +57,9 @@ export default {
         setData: {
             handler(newVal){
                 let getData = JSON.parse(JSON.stringify(newVal))
-                this.currentIndex = getData.shopType;
                 this.mainTitle = getData.title;
-                this.mainDesc = getData.desc;
                 this.shopData = getData.data || [];
-                this.firstData = getData.first || [];
-                this.secondData = getData.second || [];
-                this.copyData(getData.data);
-                this.selectType(this.currentIndex)
+                this.getSelection(this.shopData)
             },
             deep: true
     　　}
@@ -105,21 +67,7 @@ export default {
     methods: {
         setShopText(){//标题 副标题
             let title = this.mainTitle;
-            let desc = this.mainDesc;
-            this.$emit('getComponentStatus',{name:'shopTxt',data:{title,desc}});
-        },
-        selectType(type){//选择类型
-            this.currentIndex = type;
-            this.shopData = [];
-            this.selection = [];
-            if(type==1){//三图
-                this.selection = this.firstData;
-            }else{
-                this.selection = this.secondData;
-            }
-            let newSelection = JSON.parse(JSON.stringify(this.selection));
-            this.shopData = newSelection;
-            this.$emit('getComponentStatus',{name:'shopType',type:type,data:newSelection,first:this.firstData,second:this.secondData})
+            this.$emit('getComponentStatus',{name:'recommend',data:{title,data:this.shopData}});
         },
         addShops(index){//添加商品 index->更换产品
             this.modal = false;
@@ -136,20 +84,11 @@ export default {
             this.changeIndex = -1;
         },
         getSelection(selection){
-            this.copyData(selection)
-            this.$emit('getComponentStatus',{name:'shops',data:selection,first:this.firstData,second:this.secondData});
+            this.$emit('getComponentStatus',{name:'recommend',data:{title:this.mainTitle,data:selection}});
             this.$nextTick(()=>{
                 this.shopData = selection;
                 this.modal = false;
             })
-        },
-        copyData(getData=[]){//模板类型赋值
-            let type = this.currentIndex;
-            if(type==1){//三图
-                this.firstData = getData;
-            }else{
-                this.secondData = getData;
-            }
         }
     }
 }

@@ -140,7 +140,7 @@
                     </div>
                 </Tabs>
                 <div class="more_sort">
-                    <Icon type="md-list" />
+                    <Icon type="navicon-round"></Icon>
                 </div>
             </div>
         </div>

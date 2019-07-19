@@ -1,3 +1,83 @@
+
+<template>
+    <div class="shops_template">
+        <h2 class="shops_title">{{title?title:'优选商品'}}<span class="sub_title">{{desc}}</span></h2>
+        <div class="shops_module" v-if="shopType==1">
+            <div class="shop_side">
+                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
+                <Icon v-else class="shop_icon" type="image" />
+            </div>
+            <div class="shop_aside">
+                <div class="small_shop">
+                    <img class="cover" v-if="showShops.length>=2" :src="showShops[1].showUrl || showShops[1].pic">
+                    <Icon v-else class="shop_icon" type="image" />
+                </div>
+                <div class="small_shop">
+                    <img class="cover" v-if="showShops.length>=3" :src="showShops[2].showUrl || showShops[2].pic">
+                    <Icon v-else class="shop_icon" type="image" />
+                </div>
+            </div>
+        </div>
+        <div class="shops_module" v-else>
+            <div class="large_shop">
+                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
+                <Icon v-else class="shop_icon" type="image" />
+            </div>
+            <div class="shops_list">
+                <span v-for="(item,index) in showShops" :key="index">
+                    <div :class="[index==4?'more_shop small_shop':'small_shop']" v-if="index>=1">
+                        <img class="cover" v-if="showShops[index]" :src="showShops[index].showUrl || showShops[index].pic">
+                        <Icon v-else class="shop_icon" type="image" />
+                    </div>
+                </span>
+                <span v-if="!showShops.length">
+                    <div :class="[k==3?'more_shop small_shop':'small_shop']" v-for="(item,k) in 4" :key="k">
+                        <Icon class="shop_icon" type="image" />
+                    </div>
+                </span>
+                <span v-else-if="showShops.length">
+                    <div :class="[k==(4-showShops.length)?'more_shop small_shop':'small_shop']" v-for="(item,k) in (5-showShops.length)" :key="k">
+                        <Icon class="shop_icon" type="image" />
+                    </div>
+                </span>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    name:'shopsTemplate',
+    props:['moduleData'],
+    data () {
+        let moduleData = this.moduleData;
+        let header = moduleData.header;
+        return {
+            title:header.title,
+            desc:header.desc,
+            shopType: moduleData.shopType,
+            showShops: moduleData.data || [],
+            index:0,
+        }
+    },
+    watch: {
+        moduleData: {
+            handler(val) {
+                // let getData = JSON.parse(JSON.stringify(val));
+                let getData = val;
+                this.showShops = this.index++ ;
+                let header = getData.header;
+                this.title = header.title;
+                this.desc = header.desc;
+                this.shopType = getData.shopType;
+                this.$nextTick(()=>{
+                    this.showShops = getData.data || [];
+                })
+            },
+            deep: true
+    　　}
+    },
+}
+</script>
 <style lang="less" scoped>
 .shops_template{
     padding: 20px;
@@ -82,82 +162,4 @@
     }
 }
 </style>
-
-<template>
-    <div class="shops_template">
-        <h2 class="shops_title">{{title?title:'优选商品'}}<span class="sub_title">{{desc}}</span></h2>
-        <div class="shops_module" v-if="shopType==1">
-            <div class="shop_side">
-                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
-                <Icon v-else class="shop_icon" type="ios-image-outline" />
-            </div>
-            <div class="shop_aside">
-                <div class="small_shop">
-                    <img class="cover" v-if="showShops.length>=2" :src="showShops[1].showUrl || showShops[1].pic">
-                    <Icon v-else class="shop_icon" type="ios-image-outline" />
-                </div>
-                <div class="small_shop">
-                    <img class="cover" v-if="showShops.length>=3" :src="showShops[2].showUrl || showShops[2].pic">
-                    <Icon v-else class="shop_icon" type="ios-image-outline" />
-                </div>
-            </div>
-        </div>
-        <div class="shops_module" v-else>
-            <div class="large_shop">
-                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
-                <Icon v-else class="shop_icon" type="ios-image-outline" />
-            </div>
-            <div class="shops_list">
-                <span v-for="(item,index) in showShops" :key="index">
-                    <div :class="[index==4?'more_shop small_shop':'small_shop']" v-if="index>=1">
-                        <img class="cover" v-if="showShops[index]" :src="showShops[index].showUrl || showShops[index].pic">
-                        <Icon v-else class="shop_icon" type="ios-image-outline" />
-                    </div>
-                </span>
-                <span v-if="!showShops.length">
-                    <div :class="[k==3?'more_shop small_shop':'small_shop']" v-for="(item,k) in 4" :key="k">
-                        <Icon class="shop_icon" type="ios-image-outline" />
-                    </div>
-                </span>
-                <span v-else-if="showShops.length">
-                    <div :class="[k==(4-showShops.length)?'more_shop small_shop':'small_shop']" v-for="(item,k) in (5-showShops.length)" :key="k">
-                        <Icon class="shop_icon" type="ios-image-outline" />
-                    </div>
-                </span>
-            </div>
-        </div>
-    </div>
-</template>
-<script>
-export default {
-    name:'shopsTemplate',
-    props:['moduleData'],
-    data () {
-        let moduleData = this.moduleData;
-        let header = moduleData.header;
-        return {
-            title:header.title,
-            desc:header.desc,
-            shopType: moduleData.shopType,
-            showShops: moduleData.data || [],
-            index:0,
-        }
-    },
-    watch: {
-        moduleData: {
-            handler(val) {
-                this.showShops = this.index++ ;
-                let header = val.header;
-                this.title = header.title;
-                this.desc = header.desc;
-                this.shopType = val.shopType;
-                this.$nextTick(()=>{
-                    this.showShops = val.data || [];
-                })
-            },
-            deep: true
-    　　}
-    },
-}
-</script>
 
