@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="drag_header">装修商城 <Button type="default" class="fr" ghost>发布并查看</Button></div>
+    <div class="drag_header">装修商城 <Button type="default" class="fr" ghost @click="submitMall">发布并查看</Button></div>
     <div class="drag_component">
       <div class="component_side">
         <h3 class="side_title">可用组件列表</h3>
@@ -85,6 +85,9 @@ export default {
     };
   },
   methods: {
+    submitMall(){//商城提交
+      console.log(this.targetItems)
+    },
     cloneData(original) {//拷贝对象
       return JSON.parse(JSON.stringify(original));
     },
@@ -97,7 +100,7 @@ export default {
         let componentName = item.componentName;
         this.editComponent = componentName;
         let temp =this.cloneData(this.targetItems);
-        if(componentName=='sortTemplate'){
+        if(componentName=='slideTemplate'){
           this.setComponentData={
             data:[]
           }

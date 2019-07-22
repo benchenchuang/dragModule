@@ -10,7 +10,7 @@
                     <Row class="content">
                         <Col span="12">
                             <div class="content_side">
-                                <div v-if="slide.picture">
+                                <div v-if="slide.picture" class="side_upload">
                                     <div class="demo-upload-list-cover">
                                         <Icon type="ios-eye-outline" @click.native="handleView(item.url)"></Icon>
                                         <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
@@ -18,7 +18,7 @@
                                         <img class="show_pic" :src="slide.picture"/>
                                 </div>
                                 <Upload v-else ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" action="//jsonplaceholder.typicode.com/posts/">
-                                    <div>
+                                    <div class="side_upload">
                                         <Icon class="add_icon" type="plus-round"></Icon>
                                         <p class="text">添加图片</p>
                                     </div>
@@ -30,8 +30,11 @@
                             <Select v-model="slide.model" style="width:100%;margin-bottom:10px;">
                                 <Option v-for="item in routerArray" :value="item.value" :key="item.value">{{ item.label }}</Option>
                             </Select>
-                            <span class="show_name">{{slide.linkData?slide.linkData[0].name:''}}</span><Button v-if="slide.model==1" size="large" icon="md-add" type="primary" @click="selectShop(index,slide.linkData)">选择商品</Button>
-                            <Button v-if="slide.model==2" size="large" icon="md-add" type="primary">选择分类</Button>
+                            <span class="show_name">{{slide.linkData?slide.linkData[0].name:''}}</span>
+                            <Button v-if="slide.model==1" size="large" icon="md-add" type="primary" @click="selectShop(index,slide.linkData)">选择商品</Button>
+
+                            <span class="show_name">{{slide.sortData?slide.sortData[0].title:''}}</span>
+                            <Button v-if="slide.model==2" size="large" icon="md-add" type="primary" @click="selectSort(index,slide.sortData)">选择分类</Button>
                         </Col>
                     </Row>
                 </div>
@@ -54,11 +57,14 @@
             </p>
             <selectShops v-if="modal" :changeIndex="changeIndex" :isRepeat="true" :recommendData="shopData" @getSection="getSelection"/>
         </Modal>
-
+        <Modal v-model="tree" width="500" @on-ok="sortSure">
+            <navTree v-if="tree" :slideSort="slideSort" @getSortList="getSort"/>
+        </Modal>
     </div>
 </template>
 <script>
 import selectShops from './components/selectShops'
+import navTree from './components/navTree'
 export default {
     name:'slideTemplate',
     props: {
@@ -70,10 +76,13 @@ export default {
         }
     },
     components: {
-        selectShops
+        selectShops,
+        navTree
     },
     data () {
         return {
+            tree:false,
+            slideSort:[],
             routerArray: [
                 {
                     value: 0,
@@ -106,7 +115,8 @@ export default {
             shopData:null,
             changeIndex:0,
             slideIndex:null,
-            slideData: []
+            slideData: [],
+            shortSort:null,
         }
     },
     watch:{
@@ -128,16 +138,41 @@ export default {
                 this.modal = true
             })
         },
+        selectSort(index,sort){//选择分类
+            this.tree = false;
+            this.slideIndex = index;
+            this.$nextTick(()=>{
+                this.slideSort = sort || [];
+                this.tree = true
+            })
+        },
         getSelection(data){//获得选择商品
             let slideIndex = this.slideIndex;
             let slide = this.slideData[slideIndex];
             slide.linkData = data;
             this.slideData.splice(slideIndex,1,slide);
-            console.log(this.slideData)
             this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
             this.$nextTick(()=>{
                 this.modal = false;
+                this.slideIndex = null;
             })
+        },
+        sortSure(){//确定分类选择
+        console.log('sortSure')
+            let slideIndex = this.slideIndex;
+            let slide = this.slideData[slideIndex];
+            slide.sortData = this.shortSort;
+            this.slideData.splice(slideIndex,1,slide);
+            console.log(this.slideData)
+            this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
+            this.$nextTick(()=>{
+                this.tree = false;
+                this.slideIndex = null;
+                this.shortSort = null;
+            })
+        },
+        getSort(e){//获得分类
+            this.shortSort = e;
         },
         handleRemove (index) {//删除图片
 
@@ -210,6 +245,10 @@ export default {
                 font-size: 14px;
                 color: #999;
                 cursor: pointer;
+                .side_upload{
+                    width: 205px;
+                    height: 110px;
+                }
                 .add_icon{
                     margin-top: 25px;
                     font-size: 30px;

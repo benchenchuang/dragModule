@@ -88,7 +88,7 @@ export default {
                 {
                     id:1,
                     pic: 'https://resource.aijiatui.com/18550589214/company/mall/banner/767df5f06de1b8bdbddb7ae1d1acd65e.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子',
+                    name: '鞋子1',
                     sortName: '最新',
                     price: '29.00',
                     stock: '30',
@@ -97,7 +97,7 @@ export default {
                 {
                     id:2,
                     pic: 'https://resource.aijiatui.com/bm/pgfhmnmun6c0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子',
+                    name: '鞋子2',
                     sortName: '最新',
                     price: '29.00',
                     stock: '30',
@@ -106,7 +106,7 @@ export default {
                 {
                     id:3,
                     pic: 'https://resource.aijiatui.com/bm/11ci6fsqtqdg0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子',
+                    name: '鞋子3',
                     sortName: '最新',
                     price: '29.00',
                     stock: '30',
@@ -115,7 +115,7 @@ export default {
                 {
                     id:4,
                     pic: 'https://resource.aijiatui.com/bm/vu35nfnj89o0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子',
+                    name: '鞋子4',
                     sortName: '最新',
                     price: '29.00',
                     stock: '30',
@@ -124,7 +124,7 @@ export default {
             ],
             radioColumn:{
                 title:' ',
-                width: 60,
+                width: 80,
                 align: 'center',
                 render:(h,params)=>{
                     let checked = params.row._checked || false;
@@ -150,7 +150,7 @@ export default {
             },
             selectionColumn:{
                 type: 'selection',
-                width: 60,
+                width: 80,
                 align: 'center'
             },
             columns: [
