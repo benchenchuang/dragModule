@@ -38,7 +38,6 @@ export default {
     name:'singleLineTemplate',
     props: ['setData'],
     data () {
-        console.log(this.setData)
         return {
             typeTemp:this.setData.type || '1',
             nameTemp:this.setData.name || '姓名',

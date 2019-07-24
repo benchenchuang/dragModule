@@ -28,7 +28,6 @@
                                 <span v-else @click="uploadIndex=index">
                                     <Upload 
                                     ref="upload"
-                                    :show-upload-list="false"
                                     :data="qiNiuData"
                                     :on-error="onError"
                                     :on-exceeded-size="onExceeded"
@@ -107,6 +106,18 @@ export default {
     }
 }
 </script>
+<style>
+.ivu-upload-list-file{
+    top:-16px;
+}
+.ivu-upload-list-file > span{
+    display: none;
+}
+.ivu-upload-list-file .ivu-progress.ivu-progress-show-info{
+    margin-top: -8px;
+}
+</style>
+
 <style lang="less" scoped>
 .shops_table{
     margin: 10px 0 30px;

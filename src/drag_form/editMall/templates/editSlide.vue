@@ -21,7 +21,6 @@
                                     <span v-else @click="uploadIndex=index">
                                         <Upload
                                         ref="upload"
-                                        :show-upload-list="false"
                                         :data="qiNiuData"
                                         :on-error="onError"
                                         :on-exceeded-size="onExceeded"
