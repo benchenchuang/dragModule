@@ -11,10 +11,10 @@
                 <draggable :list="shopData" ghost-class="ghost" animation="300" sort="false" :group="{ put: ['shared']}">
                     <Row class="shop_item" v-for="(shop,index) in shopData" :key="index">
                         <Col span="6">
-                            <img class="shop_pic" :src="shop.pic"/>
+                            <img class="shop_pic" :src="shop.normsPic"/>
                         </Col>
-                        <Col span="6" class="shop_title">{{shop.name}}</Col>
-                        <Col span="6">￥{{shop.price}}</Col>
+                        <Col span="6" class="shop_title">{{shop.offerName}}</Col>
+                        <Col span="6">￥{{shop.offerPrice}}</Col>
                         <Col span="6">
                             <span @click="delShop(index)">删除</span>
                             <span @click="switchShop(index)">更换</span>

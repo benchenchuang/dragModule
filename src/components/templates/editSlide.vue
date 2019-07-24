@@ -5,43 +5,57 @@
             <h3 class="title">添加轮播图：</h3>
             <p class="tip">(最多可添加5张图片，拖动可调整图片顺序)</p>
             <div class="slide_content">
-                <div class="slide_item" v-for="(slide,index) in slideData" :key="index">
-                    <Icon class="slide_del" type="ios-close" @click="delSlide(index)"></Icon>
-                    <Row class="content">
-                        <Col span="12">
-                            <div class="content_side">
-                                <div v-if="slide.picture" class="side_upload">
-                                    <div class="demo-upload-list-cover">
-                                        <Icon type="ios-eye-outline" @click.native="handleView(item.url)"></Icon>
-                                        <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
+                <draggable :list="slideData" ghost-class="ghost" animation="300" sort="false" :group="{ put: ['shared']}">
+                    <div class="slide_item" v-for="(slide,index) in slideData" :key="'mall-'+index">
+                        <Icon class="slide_del" type="ios-close" @click="delSlide(index)"></Icon>
+                        <Row class="content">
+                            <Col span="12">
+                                <div class="content_side">
+                                    <div v-if="slide.picture" class="side_upload">
+                                        <div class="demo-upload-list-cover">
+                                            <Icon type="eye" @click.native="handleView(slide.picture)"></Icon>
+                                            <Icon type="trash-a" @click.native="handleRemove(index)"></Icon>
+                                        </div>
+                                            <img class="show_pic" :src="slide.picture"/>
                                     </div>
-                                        <img class="show_pic" :src="slide.picture"/>
+                                    <span v-else @click="uploadIndex=index">
+                                        <Upload
+                                        ref="upload"
+                                        :show-upload-list="false"
+                                        :data="qiNiuData"
+                                        :on-error="onError"
+                                        :on-exceeded-size="onExceeded"
+                                        :on-success="uploadSuccess"
+                                        :action="uploadUrl"
+                                        :format="['jpg','jpeg','png']" 
+                                        :max-size="2048"
+                                        >
+                                            <div class="side_upload">
+                                                <Icon class="add_icon" type="plus-round"></Icon>
+                                                <p class="text">添加图片</p>
+                                            </div>
+                                        </Upload>
+                                    </span>
                                 </div>
-                                <Upload v-else ref="upload" :format="['jpg','jpeg','png']" :max-size="2048" action="//jsonplaceholder.typicode.com/posts/">
-                                    <div class="side_upload">
-                                        <Icon class="add_icon" type="plus-round"></Icon>
-                                        <p class="text">添加图片</p>
-                                    </div>
-                                </Upload>
-                            </div>
-                        </Col>
-                        <Col offset="1" span="11">
-                            <p class="side_router">跳转路径：</p>
-                            <Select v-model="slide.model" style="width:100%;margin-bottom:10px;">
-                                <Option v-for="item in routerArray" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                            </Select>
-                            <span class="show_name">{{slide.linkData?slide.linkData[0].name:''}}</span>
-                            <Button v-if="slide.model==1" size="large" icon="md-add" type="primary" @click="selectShop(index,slide.linkData)">选择商品</Button>
+                            </Col>
+                            <Col offset="1" span="11">
+                                <p class="side_router">跳转路径：</p>
+                                <Select v-model="slide.model" style="width:100%;margin-bottom:10px;" @on-change="changeModel(index)">
+                                    <Option v-for="item in routerArray" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                                </Select>
+                                <span class="show_name">{{slide.linkData?slide.linkData[0].offerName:''}}</span>
+                                <Button v-if="slide.model==1" size="large" icon="plus" type="primary" @click="selectShop(index,slide.linkData)">选择商品</Button>
 
-                            <span class="show_name">{{slide.sortData?slide.sortData[0].title:''}}</span>
-                            <Button v-if="slide.model==2" size="large" icon="md-add" type="primary" @click="selectSort(index,slide.sortData)">选择分类</Button>
-                        </Col>
-                    </Row>
-                </div>
-                <div class="slide_item">
+                                <span class="show_name">{{slide.sortData?slide.sortData[0].title:''}}</span>
+                                <Button v-if="slide.model==2" size="large" icon="plus" type="primary" @click="selectSort(index,slide.sortData)">选择分类</Button>
+                            </Col>
+                        </Row>
+                    </div>
+                </draggable>
+                <div class="slide_item" v-if="slideData.length<5">
                     <div class="item_add">
-                        <Button @click="addSlide" size="large" icon="md-add" type="primary">添加图片</Button>
-                        <p class="suggest">建议尺寸：375*210像素</p>
+                        <Button @click="addSlide" size="large" icon="plus" type="primary">添加图片</Button>
+                        <p class="suggest">建议尺寸：750*420像素</p>
                     </div>
                 </div>
             </div>
@@ -65,8 +79,12 @@
 <script>
 import selectShops from './components/selectShops'
 import navTree from './components/navTree'
+import {uploadApi} from "@/api/common"
+import draggable from "vuedraggable";
+import {qiuNiuMixin} from '@/mixins'
 export default {
     name:'slideTemplate',
+    mixins: [qiuNiuMixin],
     props: {
         setData: {
             type: Object,
@@ -77,7 +95,8 @@ export default {
     },
     components: {
         selectShops,
-        navTree
+        navTree,
+        draggable
     },
     data () {
         return {
@@ -117,19 +136,27 @@ export default {
             slideIndex:null,
             slideData: [],
             shortSort:null,
+            uploadIndex:''
         }
     },
     watch:{
         setData: {
             handler(newVal){
                 let getData = JSON.parse(JSON.stringify(newVal));
-                this.slideData = getData.data || [];
-                this.$emit('getComponentStatus',{name:'slides',data:this.slideData})
+                this.slideData = getData.slides || [];
+                this.updateSlides()
             },
             deep: true
-    　　}
+    　　},
     },
     methods: {
+        changeModel(index){//切换路径选择
+            let slide = this.slideData[index];
+            slide.linkData = null;
+            slide.sortData = null;
+            this.slideData.splice(index,1,slide);
+            this.updateSlides()
+        },
         selectShop(index,shop){//选择商品
             this.modal = false;
             this.slideIndex = index;
@@ -151,20 +178,19 @@ export default {
             let slide = this.slideData[slideIndex];
             slide.linkData = data;
             this.slideData.splice(slideIndex,1,slide);
-            this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
+            this.updateSlides()
             this.$nextTick(()=>{
                 this.modal = false;
                 this.slideIndex = null;
             })
         },
         sortSure(){//确定分类选择
-        console.log('sortSure')
             let slideIndex = this.slideIndex;
             let slide = this.slideData[slideIndex];
             slide.sortData = this.shortSort;
             this.slideData.splice(slideIndex,1,slide);
             console.log(this.slideData)
-            this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
+            this.updateSlides()
             this.$nextTick(()=>{
                 this.tree = false;
                 this.slideIndex = null;
@@ -175,7 +201,10 @@ export default {
             this.shortSort = e;
         },
         handleRemove (index) {//删除图片
-
+            let thisSlide = this.slideData[index]
+            thisSlide.picture = '';
+            this.slideData.splice(index,1,thisSlide);
+            this.updateSlides()
         },
         cancelShops(){//取消选择产品
             this.slideIndex = null;
@@ -190,7 +219,18 @@ export default {
         },
         addSlide(){//添加轮播按钮
             this.slideData.push({});
-            this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
+            this.updateSlides()
+        },
+        uploadSuccess(res, file) {//图片上传成功
+            let thisIndex = this.uploadIndex;
+            let generalUrl = uploadApi.generalUrl(this.configData, res);
+            let thisSlide = this.slideData[thisIndex]
+            thisSlide.picture = generalUrl;
+            this.slideData.splice(thisIndex,1,thisSlide);
+            this.updateSlides()
+        },
+        updateSlides(){
+            this.$emit('getComponentStatus',{name:'slides',data:{slides:this.slideData}});
         }
     }
 }

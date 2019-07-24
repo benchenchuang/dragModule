@@ -3,12 +3,13 @@
         <div class="shops_sort">
             <Row>
                 <Col span="5">
-                    <Select v-model="params.sortModel" size="large" clearable style="width:200px" placeholder="请选择分类">
-                        <Option v-for="item in sortData" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                    <Select v-model="params.typeId" size="large" clearable style="width:200px" placeholder="请选择分类">
+                        <Option v-for="item in sortData" :value="item.id" :key="item.id">{{ item.typeName }}</Option>
                     </Select>
                 </Col>
-                <Col span="5">
-                    <Input v-model="params.shopName" size="large" search enter-button placeholder="请输入商品名称" @on-search="searchShops"/>
+                <Col span="7">
+                    <Input style="width:200px" v-model="params.offerName" size="large" placeholder="请输入商品名称"/>
+                    <Button size="large" type="primary" icon="ios-search" @click="searchShops">搜索</Button>
                 </Col>
                 <Col offset="21">
                     <Button type="primary" v-if="selection.length" size="large" @click="selectResult">确定选择</Button>
@@ -25,6 +26,7 @@
     </div>
 </template>
 <script>
+import {storeOfferApi,storeCategoryApi} from '@/api/ems'
 export default {
     name:"SelectShops",
     // props: ['sortType','firstData','secondData','changeIndex'],
@@ -62,66 +64,15 @@ export default {
     },
     data () {
         return {
-            total:100,
+            total:0,
             params:{
-                sortModel:'',
-                shopName:'',
-                pageSize:10,
+                typeId:'',
+                offerName:'',
+                pageSize:5,
                 pageNum:1
             },
-            sortData:[
-                {
-                    value:1,
-                    label:'新品'
-                },
-                {
-                    value:2,
-                    label:'最新'
-                },
-                {
-                    value:3,
-                    label:'最热'
-                }
-            ],
+            sortData:[],
             selection:[],
-            testData:[
-                {
-                    id:1,
-                    pic: 'https://resource.aijiatui.com/18550589214/company/mall/banner/767df5f06de1b8bdbddb7ae1d1acd65e.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子1',
-                    sortName: '最新',
-                    price: '29.00',
-                    stock: '30',
-                    createTime: '2018-10-03 14:12:13'
-                },
-                {
-                    id:2,
-                    pic: 'https://resource.aijiatui.com/bm/pgfhmnmun6c0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子2',
-                    sortName: '最新',
-                    price: '29.00',
-                    stock: '30',
-                    createTime: '2018-10-03 14:12:13'
-                },
-                {
-                    id:3,
-                    pic: 'https://resource.aijiatui.com/bm/11ci6fsqtqdg0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子3',
-                    sortName: '最新',
-                    price: '29.00',
-                    stock: '30',
-                    createTime: '2018-10-03 14:12:13'
-                },
-                {
-                    id:4,
-                    pic: 'https://resource.aijiatui.com/bm/vu35nfnj89o0.jpeg?imageMogr2/thumbnail/60x',
-                    name: '鞋子4',
-                    sortName: '最新',
-                    price: '29.00',
-                    stock: '30',
-                    createTime: '2018-10-03 14:12:13'
-                }
-            ],
             radioColumn:{
                 title:' ',
                 width: 80,
@@ -162,35 +113,43 @@ export default {
                 {
                     title: '商品图片',
                     align: 'center',
-                    key: 'pic',
+                    key: 'normsPic',
                     render: (h, params) => {
-                        return <img src={params.row.pic} style={{width:'60px',height:'60px'}}/>
+                        return <img src={params.row.normsPic} style={{width:'60px',height:'60px'}}/>
                     }
                 },
                 {
                     title: '商品名称',
                     align: 'center',
-                    key: 'name'
+                    key: 'offerName'
                 },
                 {
                     title: '商品类别',
                     align: 'center',
-                    key: 'sortName'
+                    key: 'typeName',
+                    render:(h,params)=>{
+                        let sortName = params.row.typeName.join(',');
+                        return <p>{sortName}</p>
+                    }
                 },
                 {
                     title: '商品单价',
                     align: 'center',
-                    key: 'price'
+                    key: 'offerPrice'
                 },
                 {
                     title: '库存',
                     align: 'center',
-                    key: 'stock'
+                    key: 'offerLeave'
                 },
                 {
                     title: '创建时间',
                     align: 'center',
-                    key: 'createTime'
+                    key: 'createTime',
+                    render:(h,params)=>{
+                        let commonTime = this.toLocaleString(params.row.createTime);
+                        return <p>{commonTime}</p>;
+                    }
                 }
             ],
             shopsList: [],
@@ -203,49 +162,61 @@ export default {
         }
     },
     created () {
+        this.getSortList();
         this.initShopList();
     },
     methods: {
-        initShopList(){//初始化商品列表
-            this.shopsList = [];
-            let addData = JSON.parse(JSON.stringify(this.testData));
-            let currentType = this.shopType;
-            let selection = [];
-            let firstData = JSON.parse(JSON.stringify(this.oneData));
-            let secondData = JSON.parse(JSON.stringify(this.twoData));
-            let shopsData = JSON.parse(JSON.stringify(this.allData));
-            let index = this.switchIndex;
-            if(index>=0){
-                this.columns[0] = this.radioColumn;
-                if(currentType==1){//三图
-                    selection[0] = firstData[index];
-                }else if(currentType==2){//五张图
-                    selection[0] = secondData[index];
-                }else{
-                    selection[0] = shopsData.length?shopsData[index]:[];
-                }
-            }else{
-                this.columns[0] = this.selectionColumn;
-                if(currentType==1){//三图
-                    selection = this.selection = firstData;
-                }else if(currentType==2){//五张图
-                    selection = this.selection = secondData;
-                }else{
-                    selection = this.selection = shopsData;
-                }
-            }
-            
-            this.checkShops(selection,addData)
-            this.$nextTick(()=>{
-                this.selection = this.selection;
-                this.shopsList = addData;
+        getSortList(){
+            storeCategoryApi.list().then(res=>{
+                this.sortData = res;
             })
         },
+        initShopList(){//初始化商品列表
+            storeOfferApi.list(this.params).then(res=>{
+                let storeList = res.dataList || [];
+                this.total = res.totalNum;
+                this.shopsList = [];
+                let addData = storeList;
+                let currentType = this.shopType;
+                let selection = [];
+                let firstData = JSON.parse(JSON.stringify(this.oneData));
+                let secondData = JSON.parse(JSON.stringify(this.twoData));
+                let shopsData = JSON.parse(JSON.stringify(this.allData));
+                let index = this.switchIndex;
+                if(index>=0){
+                    this.columns.splice(0,1,this.radioColumn);
+                    if(currentType==1){//三图
+                        selection[0] = firstData[index];
+                    }else if(currentType==2){//五张图
+                        selection[0] = secondData[index];
+                    }else{
+                        selection[0] = shopsData.length?shopsData[index]:[];
+                    }
+                }else{
+                    this.columns.splice(0,1,this.selectionColumn);
+                    if(currentType==1){//三图
+                        selection = this.selection = firstData;
+                    }else if(currentType==2){//五张图
+                        selection = this.selection = secondData;
+                    }else{
+                        selection = this.selection = shopsData;
+                    }
+                }
+                this.checkShops(selection,addData)
+                this.$nextTick(()=>{
+                    this.selection = this.selection;
+                    this.shopsList = addData;
+                })
+            })
+            
+        },
         searchShops(){//搜索商品
-            console.log(this.params.shopName)
+            this.params.pageNum =1;
+            this.initShopList();
         },
         onChange(page){//翻页
-            console.log(page)
+            this.params.pageNum = page;
+            this.initShopList();
         },
         selectionChange(selection){
             this.selection = selection;
@@ -331,6 +302,16 @@ export default {
                     })
                 })
             }
+        },
+        toLocaleString(seconds) {
+            let time = new Date(seconds)
+            return time.getFullYear() + "-" + this.addZero(time.getMonth() + 1) + "-" + this.addZero(time.getDate()) + " " +
+                this.addZero(time.getHours()) + ":" + this.addZero(time.getMinutes()) + ":" + this.addZero(time.getSeconds());
+        },
+        addZero(num) {
+            if(num<10)
+                return "0" + num;
+            return num;
         }
     }
 }

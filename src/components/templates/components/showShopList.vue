@@ -12,27 +12,39 @@
                 <draggable :list="shopData" ghost-class="ghost" animation="300" sort="false" :group="{ put: ['shared']}">
                     <Row class="shop_item" v-for="(shop,index) in shopData" :key="index">
                         <Col span="5">
-                            <img class="shop_pic" :src="shop.pic"/>
+                            <img class="shop_pic" :src="shop.normsPic"/>
                         </Col>
-                        <Col span="4" class="shop_title">{{shop.name}}</Col>
-                        <Col span="4">￥{{shop.price}}</Col>
+                        <Col span="4" class="shop_title">{{shop.offerName}}</Col>
+                        <Col span="4">￥{{shop.offerPrice}}</Col>
                         <Col span="6" class="show_cover">
                             <div class="cover">
-                                <div v-if="shop.showUrl">
+                                <div v-if="shop.picture">
                                     <div class="demo-upload-list-cover">
-                                        <Icon type="eye" @click.native="handleView(shop.showUrl)"></Icon>
-                                        <Icon type="trash" @click.native="handleRemove(index)"></Icon>
+                                        <Icon type="eye" @click.native="handleView(shop.picture)"></Icon>
+                                        <Icon type="trash-a" @click.native="handleRemove(index)"></Icon>
                                     </div>
-                                    <img class="cover_pic" :src="shop.showUrl"/>
+                                    <img class="cover_pic" :src="shop.picture"/>
                                 </div>
-                                <Upload v-else action="//jsonplaceholder.typicode.com/posts/">
-                                    <div class="no_cover">
-                                        <Icon class="add_icon" type="plus" />
-                                        <p>点击上传</p>
-                                    </div>
-                                </Upload>
+                                <span v-else @click="uploadIndex=index">
+                                    <Upload 
+                                    ref="upload"
+                                    :show-upload-list="false"
+                                    :data="qiNiuData"
+                                    :on-error="onError"
+                                    :on-exceeded-size="onExceeded"
+                                    :on-success="uploadSuccess"
+                                    :action="uploadUrl"
+                                    :format="['jpg','jpeg','png']" 
+                                    :max-size="2048">
+                                        <div class="no_cover">
+                                            <Icon class="add_icon" type="plus" />
+                                            <p>点击上传</p>
+                                        </div>
+                                    </Upload>
+                                </span>
                             </div>
-                            <p class="suggest">建议尺寸<br/>{{index==0?'222*222':'109*109'}}</p>
+                            <p class="suggest" v-if="model==1">建议尺寸<br/>{{index==0?'222*222':'109*109'}}</p>
+                            <p class="suggest" v-else>建议尺寸<br/>{{index==0?'335*188':'81*81'}}</p>
                         </Col>
                         <Col span="5">
                             <span @click="delShop(index)">删除</span>
@@ -49,9 +61,12 @@
 </template>
 <script>
 import draggable from "vuedraggable";
+import {uploadApi} from "@/api/common"
+import {qiuNiuMixin} from '@/mixins'
 export default {
     name:'showShopList',
-    props:['shopData'],
+    props:['shopData','model'],
+    mixins: [qiuNiuMixin],
     components: {
         draggable,
     },
@@ -62,13 +77,23 @@ export default {
         }
     },
     methods: {
+        uploadSuccess(res, file){//图片上传成功
+            let thisIndex = this.uploadIndex;
+            let generalUrl = uploadApi.generalUrl(this.configData, res);
+            let thisShop = this.shopData[thisIndex]
+            thisShop.picture = generalUrl;
+            this.shopData.splice(thisIndex,1,thisShop);
+            // this.$emit('getComponentStatus',{name:'slides',data:this.slideData});
+        },
         handleView (url) {//预览图片
             this.previewUrl = url;
             this.visible = true;
         },
         handleRemove(index){//删除展示图
             let shops = this.shopData;
-            shops[index].showUrl = '';
+            let thisShop = this.shopData[index]
+            thisShop.picture = '';
+            this.shopData.splice(index,1,thisShop);
         },
         delShop(index){//删除商品
             let shops = this.shopData;
@@ -76,7 +101,8 @@ export default {
         },
         switchShop(index){//更换商品
             let shops = this.shopData;
-            this.$emit('changeShop',index)
+            let picture = shops[index].picture;
+            this.$emit('changeShop',{index,picture})
         }
     }
 }

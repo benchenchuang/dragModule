@@ -41,34 +41,30 @@ export default {
     },
     data () {
         return {
-            shopData:this.setData.data,
-            mainTitle:this.setData.title,
+            shopData:this.setData.list || [],
+            mainTitle:this.setData.header.title,
             modal:false,
             changeIndex:-1
         }
     },
     watch: {
         mainTitle(val){
-            this.setShopText();
+            this.updateShops()
         },
         mainDesc(val){
-            this.setShopText();
+            this.updateShops()
         },
         setData: {
             handler(newVal){
                 let getData = JSON.parse(JSON.stringify(newVal))
-                this.mainTitle = getData.title;
-                this.shopData = getData.data || [];
+                this.mainTitle = getData.header.title;
+                this.shopData = getData.list || [];
                 this.getSelection(this.shopData)
             },
             deep: true
     　　}
     },
     methods: {
-        setShopText(){//标题 副标题
-            let title = this.mainTitle;
-            this.$emit('getComponentStatus',{name:'recommend',data:{title,data:this.shopData}});
-        },
         addShops(index){//添加商品 index->更换产品
             this.modal = false;
             this.$nextTick(()=>{
@@ -84,11 +80,14 @@ export default {
             this.changeIndex = -1;
         },
         getSelection(selection){
-            this.$emit('getComponentStatus',{name:'recommend',data:{title:this.mainTitle,data:selection}});
+            this.updateShops(selection)
             this.$nextTick(()=>{
                 this.shopData = selection;
                 this.modal = false;
             })
+        },
+        updateShops(selection=this.shopData){
+          this.$emit('getComponentStatus',{name:'recommend',data:{header:{title:this.mainTitle},list:selection}});  
         }
     }
 }

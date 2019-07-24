@@ -4,29 +4,29 @@
         <h2 class="shops_title">{{title?title:'优选商品'}}<span class="sub_title">{{desc}}</span></h2>
         <div class="shops_module" v-if="shopType==1">
             <div class="shop_side">
-                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
+                <img class="cover" v-if="showShops.length" :src="showShops[0].picture || showShops[0].normsPic">
                 <Icon v-else class="shop_icon" type="image" />
             </div>
             <div class="shop_aside">
                 <div class="small_shop">
-                    <img class="cover" v-if="showShops.length>=2" :src="showShops[1].showUrl || showShops[1].pic">
+                    <img class="cover" v-if="showShops.length>=2" :src="showShops[1].picture || showShops[1].normsPic">
                     <Icon v-else class="shop_icon" type="image" />
                 </div>
                 <div class="small_shop">
-                    <img class="cover" v-if="showShops.length>=3" :src="showShops[2].showUrl || showShops[2].pic">
+                    <img class="cover" v-if="showShops.length>=3" :src="showShops[2].picture || showShops[2].normsPic">
                     <Icon v-else class="shop_icon" type="image" />
                 </div>
             </div>
         </div>
         <div class="shops_module" v-else>
             <div class="large_shop">
-                <img class="cover" v-if="showShops.length" :src="showShops[0].showUrl || showShops[0].pic">
+                <img class="cover" v-if="showShops.length" :src="showShops[0].picture || showShops[0].normsPic">
                 <Icon v-else class="shop_icon" type="image" />
             </div>
             <div class="shops_list">
                 <span v-for="(item,index) in showShops" :key="index">
                     <div :class="[index==4?'more_shop small_shop':'small_shop']" v-if="index>=1">
-                        <img class="cover" v-if="showShops[index]" :src="showShops[index].showUrl || showShops[index].pic">
+                        <img class="cover" v-if="showShops[index]" :src="showShops[index].picture || showShops[index].normsPic">
                         <Icon v-else class="shop_icon" type="image" />
                     </div>
                 </span>
@@ -50,12 +50,12 @@ export default {
     props:['moduleData'],
     data () {
         let moduleData = this.moduleData;
-        let header = moduleData.header;
+        let header = moduleData.data.header;
         return {
             title:header.title,
             desc:header.desc,
-            shopType: moduleData.shopType,
-            showShops: moduleData.data || [],
+            shopType: moduleData.data.shopType,
+            showShops: moduleData.data.list || [],
             index:0,
         }
     },
@@ -65,12 +65,12 @@ export default {
                 // let getData = JSON.parse(JSON.stringify(val));
                 let getData = val;
                 this.showShops = this.index++ ;
-                let header = getData.header;
+                let header = getData.data.header;
                 this.title = header.title;
                 this.desc = header.desc;
-                this.shopType = getData.shopType;
+                this.shopType = getData.data.shopType;
                 this.$nextTick(()=>{
-                    this.showShops = getData.data || [];
+                    this.showShops = getData.data.list || [];
                 })
             },
             deep: true

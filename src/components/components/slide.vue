@@ -1,12 +1,12 @@
 <template>
      <div>
-        <Carousel v-model="value" loop v-if="slideData.length">
+        <Carousel v-model="value" v-if="slideData.length">
             <CarouselItem v-for="(item,index) in slideData" :key="index">
                 <div class="template_carousel" v-if="item.picture">
                     <img :src="item.picture" />
                 </div>
                 <div v-else class="template_carousel">
-                    <Icon class="carousel_icon" type="image"></Icon>
+                    <Icon class="carousel_icon" type="images"></Icon>
                 </div>
             </CarouselItem>
         </Carousel>
@@ -24,7 +24,7 @@ export default {
     data () {
         return {
             value:0,
-            slideData:[]
+            slideData:this.moduleData.data.slides || []
         }
     },
     watch:{
@@ -32,7 +32,7 @@ export default {
             handler(val) {
                 let getData= val;
                 this.$nextTick(()=>{
-                    this.slideData = getData.data || [];
+                    this.slideData = getData.data.slides || [];
                 })
             },
             deep: true

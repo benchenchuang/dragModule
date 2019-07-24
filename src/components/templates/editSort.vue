@@ -60,7 +60,7 @@
             <Row class="sort_item">
                 <Col span="4" class="title">分类管理：</Col>
                 <Col span="20">
-                    <Button type="text" class="blue" size="large">编辑商品分类</Button>
+                    <router-link to="/ems/store_category"><Button type="text" class="blue" size="large">编辑商品分类</Button></router-link>
                 </Col>
             </Row>
             <div class="tip">
@@ -98,7 +98,7 @@ export default {
     },
     watch: {
         setData: {
-            handler(newVal, oldVal) {
+            handler(newVal) {
                 this.currentIndex = newVal.moduleType;
             },
             deep: true
@@ -107,7 +107,7 @@ export default {
     methods: {
         selectSort(index){
             this.currentIndex = index;
-            this.$emit('getComponentStatus',{name:'setSort',type:index})
+            this.$emit('getComponentStatus',{name:'setSort',data:{moduleType:index}})
         }
     }
 }

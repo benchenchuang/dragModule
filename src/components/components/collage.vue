@@ -13,7 +13,7 @@ export default {
     name:'collageModel',
     props:['moduleData'],
     data () {
-        let moduleData = this.moduleData;
+        let moduleData = this.moduleData.data;
         let header = moduleData.header;
         return {
             title:header.title,
@@ -23,7 +23,7 @@ export default {
     watch: {
         moduleData: {
             handler(val) {
-                let getData = val;
+                let getData = val.data;
                 let header = getData.header;
                 this.title = header.title;
                 this.desc = header.desc;

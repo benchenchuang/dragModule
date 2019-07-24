@@ -26,8 +26,8 @@ export default{
     props: ['setData'],
     data () {
         return {
-            mainTitle:this.setData.title,
-            mainDesc:this.setData.desc,
+            mainTitle:this.setData.header.title,
+            mainDesc:this.setData.header.desc,
         }
     },
     watch: {
@@ -40,8 +40,8 @@ export default{
         setData: {
             handler(newVal){
                 let getData = JSON.parse(JSON.stringify(newVal))
-                this.mainTitle = getData.title;
-                this.mainDesc = getData.desc;
+                this.mainTitle = getData.header.title;
+                this.mainDesc = getData.header.desc;
             },
             deep: true
     　　}
@@ -50,7 +50,7 @@ export default{
         setShopText(){//标题 副标题
             let title = this.mainTitle;
             let desc = this.mainDesc;
-            this.$emit('getComponentStatus',{name:'collage',data:{title,desc}});
+            this.$emit('getComponentStatus',{name:'collage',data:{header:{title,desc}}});
         },
     }
 }

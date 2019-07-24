@@ -1,12 +1,12 @@
 <template>
     <div class="shops_template">
-        <h2 class="shops_title">{{title?title:'推荐商品'}}<span class="sub_title">{{desc}}</span></h2>
+        <h2 class="shops_title">{{title?title:'推荐商品'}}</h2>
         <div class="collage_list" v-if="showShops.length">
             <Row :gutter="16">
                 <Col span="12" class="shop_item" v-for="(shop,index) in showShops" :key="index">
-                    <img class="pro" :src="shop.pic"/>
-                    <h3 class="title">{{shop.name}}</h3>
-                    <div class="price"><span>￥{{shop.price?shop.price:'0.00'}}</span><del>￥{{shop.oldPrice?shop.oldPrice:'0.00'}}</del></div>
+                    <img class="pro" :src="shop.normsPic"/>
+                    <h3 class="title">{{shop.offerName}}</h3>
+                    <div class="price"><span>￥{{shop.discountPrice?shop.discountPrice:(shop.offerPrice?shop.offerPrice:'0.00')}}</span><del>￥{{shop.offerPrice?shop.offerPrice:'0.00'}}</del></div>
                 </Col>
             </Row>
         </div>
@@ -22,23 +22,22 @@ export default {
     name:'recommendModel',
     props:['moduleData'],
     data () {
-        let moduleData = this.moduleData;
+        let moduleData = this.moduleData.data;
         let header = moduleData.header;
         return {
             title:header.title,
-            desc:header.desc,
-            showShops: moduleData.data || [],
+            showShops: moduleData.list || [],
         }
     },
     watch: {
         moduleData: {
             handler(val) {
-                let getData = val;
+                let getData = val.data;
                 let header = getData.header;
                 this.title = header.title;
                 this.desc = header.desc;
                 this.$nextTick(()=>{
-                    this.showShops = getData.data || [];
+                    this.showShops = getData.list || [];
                 })
             },
             deep: true

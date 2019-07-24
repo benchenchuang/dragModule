@@ -121,19 +121,21 @@
 
 <template>
     <div class="sort_template">
-        <div class="sort_item" v-if="moduleData.moduleType==1">
+        <div class="sort_item" v-if="moduleData.data.moduleType==1">
             <div class="sort_head">
                 <Tabs>
                     <div v-for="(item,index) in tabs" :key="index">
-                        <TabPane :label="item.title" v-if="index<3">
-                            <Row class="tab_list" v-if="item.subNavs.length">
-                                <div v-for="(tab,k) in item.subNavs" :key="k">
-                                    <Col span="8" v-if="k<6">
-                                        <div class="tab_item">
-                                            <img class="pic" :src="tab.icon"/>
-                                            <p class="label">{{tab.title}}</p>
-                                        </div>
-                                    </Col>
+                        <TabPane :label="item.typeName" v-if="index<3">
+                            <Row class="tab_list">
+                                <div v-if="item.lists && item.lists.length">
+                                    <div v-for="(tab,k) in item.lists" :key="k">
+                                        <Col span="8" v-if="k<6">
+                                            <div class="tab_item">
+                                                <img class="pic" :src="tab.logo"/>
+                                                <p class="label">{{tab.typeName}}</p>
+                                            </div>
+                                        </Col>
+                                    </div>
                                 </div>
                             </Row>
                         </TabPane>
@@ -144,19 +146,19 @@
                 </div>
             </div>
         </div>
-        <div class="sort_item" v-else-if="moduleData.moduleType==2">
+        <div class="sort_item" v-else-if="moduleData.data.moduleType==2">
             <div class="main_tabs">
                 <div class="sort_tabs">
-                    <p @click="switchTab(index)" :class="thisIndex==index?'on sort_label':'sort_label'" v-for="(item,index) in tabs" :key="index">{{item.title}}</p>
+                    <p @click="switchTab(index)" :class="thisIndex==index?'on sort_label':'sort_label'" v-for="(item,index) in tabs" :key="index">{{item.typeName}}</p>
                     <p class="sort_label more">全部 <Icon type="ios-arrow-forward" /></p>
                 </div>
             </div>
             <div class="sort_subNavs">
                 <div v-for="(item,index) in tabs" :key="index">
                     <div class="sub_item" v-if="index==thisIndex">
-                        <div class="sub" v-for="(tab,k) in item.subNavs" :key="k">
-                            <img :src="tab.icon" />
-                            <p class="label">{{tab.title}}</p>
+                        <div class="sub" v-for="(tab,k) in item.lists" :key="k">
+                            <img :src="tab.logo" />
+                            <p class="label">{{tab.typeName}}</p>
                         </div>
                     </div>
                 </div>
@@ -165,77 +167,33 @@
         <div class="sort_item" v-else>
             <div class="main_navs">
                 <div class="sort_navs" v-for="(item,index) in tabs" :key="index">
-                    <img class="nav_icon" :src="item.icon"/>
-                    <p class="label">{{item.title}}</p>
+                    <img class="nav_icon" :src="item.logo"/>
+                    <p class="label">{{item.typeName}}</p>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
+import { storeCategoryApi } from '@/api/ems'
 export default {
     name:'sortTemplate',
     props:['moduleData'],
     data () {
         return {
-            tabs:[
-                {
-                    title:'女鞋',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[
-                        {
-                            title:'测试1',
-                            icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                            path:'/'
-                        },
-                        {
-                            title:'测试2',
-                            icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                            path:'/'
-                        },
-                        {
-                            title:'测试3',
-                            icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                            path:'/'
-                        }
-                    ]
-                },
-                {
-                    title:'华为',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[
-                        {
-                            title:'测试2',
-                            icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                            path:'/'
-                        }
-                    ]
-                },
-                {
-                    title:'小米',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[]
-                },
-                {
-                    title:'OPPO',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[]
-                },
-                {
-                    title:'小米',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[]
-                },
-                {
-                    title:'OPPO',
-                    icon:'https://resource.aijiatui.com/bm/pkugf0dl2q40.png',
-                    subNavs:[]
-                }
-            ],
+            tabs:[],
             thisIndex:0,
         }
     },
+    created () {
+        this.getSortList();  
+    },
     methods: {
+        getSortList(){
+            storeCategoryApi.list().then(res=>{
+                this.tabs = res;
+            })
+        },
         switchTab(index){
             this.thisIndex = index;
         }

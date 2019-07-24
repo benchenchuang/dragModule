@@ -38,61 +38,13 @@
     </div>
 </template>
 <script>
+import { storeCategoryApi } from '@/api/ems'
 export default {
     name:'navComponent',
     props:['slideSort'],
     data () {
         return {
-            treeData:[],
-            tree:[
-                {
-                    all_num : 0,
-                    id : "1",
-                    lists : [{
-                        all_num : 0,
-                        id : "2",
-                        lists : null,
-                        logo : null,
-                        parent_id : "1",
-                        type_name: "商品1"
-                    },
-                    {
-                        all_num : 0,
-                        id : "3",
-                        lists : null,
-                        logo : null,
-                        parent_id : "1",
-                        type_name: "商品2"
-                    }],
-                    logo : null,
-                    parent_id : "0",
-                    type_name: "商品3"
-                },
-                {
-                    all_num : 0,
-                    id : "4",
-                    lists :null,
-                    logo : null,
-                    parent_id : "0",
-                    type_name: "商品4"
-                },
-                {
-                    all_num : 0,
-                    id : "5",
-                    lists :null,
-                    logo : null,
-                    parent_id : "0",
-                    type_name: "商品5"
-                },
-                {
-                    all_num : 0,
-                    id : "6",
-                    lists :null,
-                    logo : null,
-                    parent_id : "0",
-                    type_name: "商品6"
-                }
-            ],
+            treeData:[]
         }
     },
     // watch: {
@@ -110,10 +62,12 @@ export default {
     },
     methods: {
         loadNavData(){
-            let tree = this.tree;
-            let selectId = this.slideSort.length?this.slideSort[0].id:''
-            let newTreeData = this.filterTree(tree,selectId);
-            this.treeData = newTreeData;
+            storeCategoryApi.list().then(res=>{
+                let tree = res;
+                let selectId = this.slideSort.length?this.slideSort[0].id:''
+                let newTreeData = this.filterTree(tree,selectId);
+                this.treeData = newTreeData;
+            })
         },
         checkChange(e){
             let thisId = e.length?e[0].id:'';
@@ -124,7 +78,7 @@ export default {
         filterTree(tree,id){
             // return asyncRouterMap
             let newTree = tree.map((item,index) => {
-                item.title = item.type_name;
+                item.title = item.typeName;
                 item.expand = true;
                 if(item.id == id){
                     this.$set(item,"checked",true);

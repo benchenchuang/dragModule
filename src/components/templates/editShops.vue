@@ -30,11 +30,11 @@
         <div class="shops_wrap">
             <p class="title">展示商品：</p>
             <div class="shops_other">
-                <Button size="large" @click="addShops" icon="md-add" type="primary">添加商品</Button>
+                <Button size="large" @click="addShops({index:-1})" icon="md-add" type="primary">添加商品</Button>
                 <span class="warning">必须添加 {{currentIndex==1?3:5}} 个商品</span>
                 <span class="sub_tip">(上下拖动可调整商品顺序)</span>
             </div>
-            <showShopList :shopData="shopData" @changeShop="addShops"/>
+            <showShopList :shopData="shopData" :model="currentIndex" @changeShop="addShops"/>
         </div>
         
         <Modal v-model="modal" width="1100" footer-hide @on-cancel="cancelShops">
@@ -56,6 +56,7 @@ export default {
         selectShops
     },
     data () {
+        console.log(this.setData)
         return {
             shopTypes:[
                 {
@@ -72,9 +73,9 @@ export default {
             shopData:[],
             firstData:[],
             secondData:[],
-            mainTitle:this.setData.title,
-            mainDesc:this.setData.desc,
-            currentIndex:this.setData.shopType,
+            mainTitle:'',
+            mainDesc:'',
+            currentIndex:1,
             modal:false,
             changeIndex:-1,
             selection:[]
@@ -82,32 +83,27 @@ export default {
     },
     watch: {
         mainTitle(val){
-            this.setShopText();
+            this.updateShops()
         },
         mainDesc(val){
-            this.setShopText();
+            this.updateShops()
         },
         setData: {
             handler(newVal){
                 let getData = JSON.parse(JSON.stringify(newVal))
                 this.currentIndex = getData.shopType;
-                this.mainTitle = getData.title;
-                this.mainDesc = getData.desc;
-                this.shopData = getData.data || [];
+                this.mainTitle = getData.header.title;
+                this.mainDesc = getData.header.desc;
+                this.shopData = getData.list || [];
                 this.firstData = getData.first || [];
                 this.secondData = getData.second || [];
-                this.copyData(getData.data);
+                this.copyData(getData.list);
                 this.selectType(this.currentIndex)
             },
             deep: true
     　　}
     },
     methods: {
-        setShopText(){//标题 副标题
-            let title = this.mainTitle;
-            let desc = this.mainDesc;
-            this.$emit('getComponentStatus',{name:'shopTxt',data:{title,desc}});
-        },
         selectType(type){//选择类型
             this.currentIndex = type;
             this.shopData = [];
@@ -119,13 +115,14 @@ export default {
             }
             let newSelection = JSON.parse(JSON.stringify(this.selection));
             this.shopData = newSelection;
-            this.$emit('getComponentStatus',{name:'shopType',type:type,data:newSelection,first:this.firstData,second:this.secondData})
+            this.updateShops(newSelection)
         },
-        addShops(index){//添加商品 index->更换产品
+        addShops(data){//添加商品 index->更换产品
             this.modal = false;
+            this.shopPicture = data?data.picture:''
             this.$nextTick(()=>{
-                if(index>=0){
-                    this.changeIndex = index;
+                if(data && data.index>=0){
+                    this.changeIndex = data.index;
                 }
                 this.modal = true
             })
@@ -133,14 +130,35 @@ export default {
         cancelShops(){//取消选择产品
             let shopData = this.shopData;
             this.selection = shopData;
+            this.shopPicture = null
             this.changeIndex = -1;
         },
         getSelection(selection){
+            let type = this.currentIndex;
+            let newSelection = selection;
             this.copyData(selection)
-            this.$emit('getComponentStatus',{name:'shops',data:selection,first:this.firstData,second:this.secondData});
+            newSelection.map(item=>{
+                this.shopData.map(shop=>{
+                    if(shop.id == item.id){
+                        item.picture = shop.picture || '';
+                    }
+                })
+            })
+            if(this.changeIndex>=0){
+                newSelection[this.changeIndex].picture = this.shopPicture;
+                if(type==1){
+                    this.firstData[this.changeIndex].picture = this.shopPicture
+                }else{
+                    this.secondData[this.changeIndex].picture = this.shopPicture
+                }
+            }
+
+            this.updateShops(newSelection)
             this.$nextTick(()=>{
-                this.shopData = selection;
+                this.shopData = newSelection;
                 this.modal = false;
+                this.shopPicture = null;
+                this.changeIndex = -1
             })
         },
         copyData(getData=[]){//模板类型赋值
@@ -150,6 +168,9 @@ export default {
             }else{
                 this.secondData = getData;
             }
+        },
+        updateShops(newSelection=this.shopData){
+            this.$emit('getComponentStatus',{name:'shops',data:{header:{title:this.mainTitle,desc:this.mainDesc},shopType:this.currentIndex,list:newSelection,first:this.firstData,second:this.secondData}});
         }
     }
 }
